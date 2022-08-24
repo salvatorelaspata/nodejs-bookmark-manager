@@ -58,39 +58,68 @@ profile.map((p) => {
 // 		}
 // 	}
 // };
+const _newLightObj = ({ name, url }) => ({ name, url });
+const _composeFormattedObj = (objectFile, lightObj = false) => {
+	const { bookmark_bar, other, synced } = objectFile.roots;
+	const allBookmark = [];
+	function _recursiveChildrenCheck(node) {
+		if (node.hasOwnProperty("children")) {
+			// const element = node[prop];
+			// console.log("children");
+			node.children.map((n) => {
+				_recursiveChildrenCheck(n);
+			});
+		} else {
+			// console.log("node");
+			allBookmark.push(lightObj ? _newLightObj(node) : node);
+		}
+	}
+	// console.log(allBookmark.length);
+	_recursiveChildrenCheck(bookmark_bar);
+	// console.log(allBookmark.length);
+	_recursiveChildrenCheck(other);
+	// console.log(allBookmark.length);
+	_recursiveChildrenCheck(synced);
+	// console.log(allBookmark.length);
+	return allBookmark;
+};
 
-// const _composeFormattedObj = (objectFile) => {
-// 	const { bookmark_bar, other, synced } = objectFile.roots;
-// 	const allBookmark = { ...bookmark_bar, ...other, ...synced };
-// 	return allBookmark.children;
-// };
 Promise.all(aPromise)
 	.then((values) => {
-		const obj = {};
-		// let objMerged = {};
+		const obj = {},
+			objSimple = {};
+		const objMerged = [],
+			objSimpleMerged = [];
 		values.map((v) => {
-			obj[v.path] = JSON.parse(v.data);
-			// not working
-			// objMerged = { ...objMerged, ...JSON.parse(v.data) };
-
-			// if (objMerged) {
-			// 	console.log(objMerged.roots.bookmark_bar.children.length);
-			// 	console.log(JSON.parse(v.data).roots.bookmark_bar.children.length);
-			// }
+			obj[v.path] = _composeFormattedObj(JSON.parse(v.data));
+			objMerged.push(..._composeFormattedObj(JSON.parse(v.data)));
+			objSimple[v.path] = _composeFormattedObj(JSON.parse(v.data), true);
+			objSimpleMerged.push(..._composeFormattedObj(JSON.parse(v.data), true));
 		});
 		const outputJson = JSON.stringify(obj, null, 2);
 		writeFile("outputFile.json", outputJson, (err) => {
 			if (err) throw err;
 			console.log("File written.");
 		});
-		// delete objMerged.sync_metadata;
-		// delete objMerged.version;
-		// console.log(objMerged.roots.bookmark_bar.children.length);
-		// const outputMergedJson = JSON.stringify(objMerged.roots, null, 2);
-		// writeFile("outputMergedFile.json", outputMergedJson, (err) => {
-		// 	if (err) throw err;
-		// 	console.log("File written.");
-		// });
+		const outputSimpleJson = JSON.stringify(objSimple, null, 2);
+		writeFile("outputSimpleFile.json", outputSimpleJson, (err) => {
+			if (err) throw err;
+			console.log("File written.");
+		});
+		const outputMergedJson = JSON.stringify({ bookmarks: objMerged }, null, 2);
+		writeFile("outputMergedFile.json", outputMergedJson, (err) => {
+			if (err) throw err;
+			console.log("File written.");
+		});
+		const outputsSimpleMergedJson = JSON.stringify(
+			{ bookmarks: objSimpleMerged },
+			null,
+			2
+		);
+		writeFile("outputSimpleMergedFile.json", outputsSimpleMergedJson, (err) => {
+			if (err) throw err;
+			console.log("File written.");
+		});
 	})
 	.catch((err) => {
 		console.log(err);
