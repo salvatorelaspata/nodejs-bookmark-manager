@@ -1,12 +1,5 @@
-import {
-	readFileSync,
-	existsSync,
-	writeFile,
-	readdirSync,
-	fstat,
-	readFile,
-} from "fs";
-import { platform } from "os";
+import { writeFile, readdirSync, readFile, existsSync } from "fs";
+import { homedir, platform } from "os";
 import { join } from "path";
 
 // 1. necessario discriminare l'implementazione per sistemi osx, windows e linux
@@ -24,24 +17,29 @@ switch (p) {
 	default:
 		break;
 }
-
+// homedir() --> "/Users/<user>/" || "C:\Users\<user>"
 // 2.1 macos  - /Users/<user>/Library/Application Support/Google/Chrome/*
 //              per determinare quanti utenti sono presenti
 // 2.2 win    - C:\Users\<user>\AppData\Local\Google\Chrome\User Data\*
-const rootChromeRootPath = join(process.env.HOME, dir);
+const rootChromeRootPath = join(homedir(), dir);
 const readRootBookmarkFolder = readdirSync(rootChromeRootPath);
 const profile = readRootBookmarkFolder.filter(
 	(b) => b.startsWith("Profile") || b.startsWith("Default")
 );
 
-const _readAsync = (filePath) =>
-	new Promise((res, rej) => {
-		readFile(filePath, (err, data) => {
-			console.log("readFile", filePath);
-			if (err) return rej(err);
-			res({ data, path: filePath });
+const _readAsync = (filePath) => {
+	if (existsSync(filePath)) {
+		return new Promise((res, rej) => {
+			readFile(filePath, (err, data) => {
+				console.log("readFile", filePath);
+				if (err) return rej(err);
+				res({ data, path: filePath });
+			});
 		});
-	});
+	} else {
+		return new Promise.resolve({ data: null, path: filePath });
+	}
+};
 
 const aPromise = [];
 profile.map((p) => {
