@@ -19,6 +19,7 @@ const _newManagedMd = ({
 }  |
 `;
 
+// export const composeFormattedObj: any[] = (objectFile: any, lightObj: boolean = false) => {
 export const composeFormattedObj = (objectFile, lightObj = false) => {
 	const { bookmark_bar, other, synced } = objectFile.roots;
 	const aAllBookmark = [];
@@ -37,6 +38,7 @@ export const composeFormattedObj = (objectFile, lightObj = false) => {
 	return aAllBookmark;
 };
 
+// export const formatMD: string = (objectFile: any, lightObj: boolean = false) => {
 export const formatMD = (objectFile, lightObj = false) => {
 	const aAllBookmark = composeFormattedObj(objectFile, lightObj);
 	return aAllBookmark

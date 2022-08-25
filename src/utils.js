@@ -2,8 +2,10 @@ import { existsSync, readFile, writeFile, readdirSync } from "fs";
 import { homedir, platform } from "os";
 import { join } from "path";
 
+// const _getPlatform: Platform = platform.call();
 const _getPlatform = platform.call();
 
+// export const getProfile:{rootChromeRootPath: String, readRootBookmarkFolder: string[]} = () => {
 export const getProfile = () => {
 	// 1. necessario discriminare l'implementazione per sistemi osx, windows e linux
 	console.log(`This platform is ${_getPlatform}`);
@@ -20,7 +22,6 @@ export const getProfile = () => {
 			break;
 		default:
 			throw Error("OS not working!");
-			break;
 	}
 
 	const rootChromeRootPath = join(homedir(), dir);
@@ -28,6 +29,7 @@ export const getProfile = () => {
 	return { rootChromeRootPath, readRootBookmarkFolder };
 };
 
+// export const readAsync: Promise<{data: Buffer, path: string}> = (filePath: string) => {
 export const readAsync = (filePath) => {
 	if (existsSync(filePath)) {
 		return new Promise((res, rej) => {
@@ -42,6 +44,7 @@ export const readAsync = (filePath) => {
 	}
 };
 
+// export const writeAsync: Promise<void> = (filePath: string, file: string) => {
 export const writeAsync = (filePath, file) => {
 	return new Promise((res, rej) => {
 		// override file if exists
