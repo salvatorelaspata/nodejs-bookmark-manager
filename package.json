@@ -3,11 +3,22 @@
   "version": "1.0.0",
   "description": "",
   "type": "module",
-  "main": "index.js",
+  "main": "src/cli.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node src/index.js"
   },
-  "keywords": [],
-  "author": "",
+  "bin": {
+    "@salvatorelaspata/create-project": "bin/create-project.js",
+    "create-project": "bin/create-project.js"
+  },
+  "keywords": [
+    "cli",
+    "bookmark",
+    "bookmarks",
+    "chrome bookmarks",
+    "bookmarks manager"
+  ],
+  "author": "Salvatore La Spata",
   "license": "ISC"
 }
