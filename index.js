@@ -1,26 +1,26 @@
 import { writeFile, readdirSync, readFile, existsSync } from "fs";
 import { homedir, platform } from "os";
 import { join } from "path";
+import { composeFormattedObj, formatMD } from "./src/formatter.js";
 
 // 1. necessario discriminare l'implementazione per sistemi osx, windows e linux
 const p = platform.call();
 console.log(`This platform is ${p}`);
+// homedir() --> "/Users/<user>/" || "C:\Users\<user>"
+// 2.1 macos  - /Users/<user>/Library/Application Support/Google/Chrome/*
+// 2.2 win    - C:\Users\<user>\AppData\Local\Google\Chrome\User Data\*
 let dir = "";
 switch (p) {
 	case "darwin":
 		dir = "/Library/Application Support/Google/Chrome/";
 		break;
 	case "win32":
-		console.log("bbbbb");
 		dir = "/AppData/Local/Google/Chrome/User Data/";
 		break;
 	default:
 		break;
 }
-// homedir() --> "/Users/<user>/" || "C:\Users\<user>"
-// 2.1 macos  - /Users/<user>/Library/Application Support/Google/Chrome/*
-//              per determinare quanti utenti sono presenti
-// 2.2 win    - C:\Users\<user>\AppData\Local\Google\Chrome\User Data\*
+
 const rootChromeRootPath = join(homedir(), dir);
 const readRootBookmarkFolder = readdirSync(rootChromeRootPath);
 const profile = readRootBookmarkFolder.filter(
@@ -48,53 +48,21 @@ profile.map((p) => {
 	aPromise.push(_readAsync(path));
 });
 
-// const _recursiveFormattedObj = (obj) => {
-// 	for (var property in obj) {
-// 		if (obj.hasOwnProperty(property)) {
-// 			if (property === "type" && obj[property] === "folder") {
-// 				console.log("folder", obj);
-// 				_recursiveFormattedArray(obj["children"]);
-// 			}
-// 		}
-// 	}
-// };
-const _newLightObj = ({ name, url }) => ({ name, url });
-const _composeFormattedObj = (objectFile, lightObj = false) => {
-	const { bookmark_bar, other, synced } = objectFile.roots;
-	const allBookmark = [];
-	function _recursiveChildrenCheck(node) {
-		if (node.hasOwnProperty("children")) {
-			// const element = node[prop];
-			// console.log("children");
-			node.children.map((n) => {
-				_recursiveChildrenCheck(n);
-			});
-		} else {
-			// console.log("node");
-			allBookmark.push(lightObj ? _newLightObj(node) : node);
-		}
-	}
-	// console.log(allBookmark.length);
-	_recursiveChildrenCheck(bookmark_bar);
-	// console.log(allBookmark.length);
-	_recursiveChildrenCheck(other);
-	// console.log(allBookmark.length);
-	_recursiveChildrenCheck(synced);
-	// console.log(allBookmark.length);
-	return allBookmark;
-};
-
 Promise.all(aPromise)
 	.then((values) => {
 		const obj = {},
 			objSimple = {};
 		const objMerged = [],
 			objSimpleMerged = [];
+		let mdFile = "",
+			mdFileSimple = "";
 		values.map((v) => {
-			obj[v.path] = _composeFormattedObj(JSON.parse(v.data));
-			objMerged.push(..._composeFormattedObj(JSON.parse(v.data)));
-			objSimple[v.path] = _composeFormattedObj(JSON.parse(v.data), true);
-			objSimpleMerged.push(..._composeFormattedObj(JSON.parse(v.data), true));
+			obj[v.path] = composeFormattedObj(JSON.parse(v.data));
+			objMerged.push(...composeFormattedObj(JSON.parse(v.data)));
+			objSimple[v.path] = composeFormattedObj(JSON.parse(v.data), true);
+			objSimpleMerged.push(...composeFormattedObj(JSON.parse(v.data), true));
+			mdFile += formatMD(JSON.parse(v.data));
+			mdFileSimple += formatMD(JSON.parse(v.data), true);
 		});
 		const outputJson = JSON.stringify(obj, null, 2);
 		writeFile("outputFile.json", outputJson, (err) => {
@@ -117,6 +85,15 @@ Promise.all(aPromise)
 			2
 		);
 		writeFile("outputSimpleMergedFile.json", outputsSimpleMergedJson, (err) => {
+			if (err) throw err;
+			console.log("File written.");
+		});
+
+		writeFile("output.md", mdFile, (err) => {
+			if (err) throw err;
+			console.log("File written.");
+		});
+		writeFile("outputSimple.md", mdFileSimple, (err) => {
 			if (err) throw err;
 			console.log("File written.");
 		});
