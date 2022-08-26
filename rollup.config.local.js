@@ -1,11 +1,10 @@
 import typescript from "@rollup/plugin-typescript";
 
 export default {
-	input: "src/cli.ts",
+	input: ["src/index.ts", "src/formatter.ts", "src/utils.ts"],
 	output: {
-		dir: "dist",
+		dir: "distlocal",
 		format: "es",
 	},
 	plugins: [typescript()],
-	external: ["figlet", "inquirer", "os", "fs", "os"],
 };
