@@ -12,20 +12,20 @@ This solution read filesystem to retrieve profile in the following path:
 
 Chrome installed and all profile are sync
 
-## Getting started
+# Basic getting started
 
-1. clone this repo
-2. `node index.js`
+1. clone this repo & navigate to the repo
+2. `npm install`
+3. `npm start`
 
 at the end the output file will be downloaded in the root directory
 
 # Cli interfaces
 
-- clone this repo
-- navigate to new directory
+- clone this repo & navigate to new directory
 - install dependencies `npm install`
 - link cli `npm link`
-- exec `bookmark-manager`
+- exec `bookmark-manager` from terminal
 
 ## Coming soon
 
