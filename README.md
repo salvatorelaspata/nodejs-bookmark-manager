@@ -19,4 +19,16 @@ Chrome installed and all profile are sync
 
 at the end the output file will be downloaded in the root directory
 
+# Cli interfaces
+
+- clone this repo
+- navigate to new directory
+- install dependencies `npm install`
+- link cli `npm link`
+- exec `bookmark-manager`
+
+## Coming soon
+
+implement args to automatize wizard
+
 ### Enjoy

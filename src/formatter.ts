@@ -1,6 +1,7 @@
-const _newLightObj = ({ name, url }) => ({ name, url });
-const _newLightMdLink = ({ name, url }) => `[${name}](${url}).`;
-const _newManagedMd = ({
+
+const _newLightObj: NameUrlSign = ({ name, url }) => ({ name, url });
+const _newLightMdLink: NameUrlMdSign = ({ name, url }) => `[${name}](${url}).`;
+const _newManagedMd: (arg0: Partial<Child>) => string = ({
 	date_added,
 	guid,
 	id,
@@ -19,12 +20,13 @@ const _newManagedMd = ({
 }  |
 `;
 
-export const composeFormattedObj = (objectFile, lightObj = false) => {
+export const composeFormattedObj: (objectFile: Bookmark, lightObj?: boolean) => Partial<Child>[] 
+	= (objectFile, lightObj = false) => {
 	const { bookmark_bar, other, synced } = objectFile.roots;
-	const aAllBookmark = [];
-	function _recursiveChildrenCheck(node) {
+	const aAllBookmark:Partial<Child>[]  = [];
+	function _recursiveChildrenCheck(node: Partial<Child>) {
 		if (node.hasOwnProperty("children")) {
-			node.children.map((n) => {
+			node.children && node.children.map((n) => {
 				_recursiveChildrenCheck(n);
 			});
 		} else {
@@ -37,7 +39,9 @@ export const composeFormattedObj = (objectFile, lightObj = false) => {
 	return aAllBookmark;
 };
 
-export const formatMD = (objectFile, lightObj = false) => {
+// export const formatMD: string = (objectFile: any, lightObj: boolean = false) => {
+export const formatMD: (objectFile: Bookmark, lightObj?: boolean) => string 
+	= (objectFile, lightObj = false) => {
 	const aAllBookmark = composeFormattedObj(objectFile, lightObj);
 	return aAllBookmark
 		.map((b) => (lightObj ? _newLightMdLink(b) : _newManagedMd(b)))

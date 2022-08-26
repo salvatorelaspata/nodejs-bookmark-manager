@@ -3,14 +3,17 @@
   "version": "1.0.0",
   "description": "",
   "type": "module",
-  "main": "src/cli.js",
+  "main": "dist/cli.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node src/index.js"
+    "build": "rollup -c rollup.config.js",
+    "dev": "rollup -c rollup.config.js --watch",
+    "start": "rollup -c rollup.config.local.js && node distlocal/index.js",
+    "build:local": "rollup -c rollup.config.local.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
   },
   "bin": {
-    "@salvatorelaspata/create-project": "bin/create-project.js",
-    "create-project": "bin/create-project.js"
+    "@salvatorelaspata/bookmark-manager": "bin/bookmark-manager.js",
+    "bookmark-manager": "bin/bookmark-manager.js"
   },
   "keywords": [
     "cli",
@@ -20,5 +23,18 @@
     "bookmarks manager"
   ],
   "author": "Salvatore La Spata",
-  "license": "ISC"
+  "license": "ISC",
+  "devDependencies": {
+    "@rollup/plugin-typescript": "8.4.0",
+    "@types/figlet": "1.5.5",
+    "@types/inquirer": "9.0.1",
+    "@types/node": "18.7.13",
+    "rollup": "2.78.1",
+    "tslib": "2.4.0",
+    "typescript": "4.7.4"
+  },
+  "dependencies": {
+    "figlet": "1.5.2",
+    "inquirer": "9.1.0"
+  }
 }
