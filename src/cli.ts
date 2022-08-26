@@ -13,8 +13,7 @@ export function cli(args: Args) {
 		{
 			type: "list",
 			name: "profile",
-			message:
-				"Sono stati trovati questi G profili sul tuo PC?\nQuali vuoi consultare?",
+			message: `Sono stati trovati ${profiles.length} G profili sul tuo PC.\nQuali vuoi consultare?`,
 			choices: ["ALL", ...profiles],
 		},
 		{
@@ -49,7 +48,13 @@ export function cli(args: Args) {
 			type: "input",
 			name: "directory",
 			message:
-				'Dove vuoi salvare i file?\nSpecificare una directory,\nSe si intende salvare nella cartella corrente premere ENTER o punto (".") + ENTER.',
+				"Dove vuoi salvare i file?\nSpecificare una directory,\nSe si intende salvare nella cartella corrente premere ENTER",
+		},
+		{
+			type: "confirm",
+			name: "recursive",
+			message: "Vuoi continuare a scaricare?",
+			default: false,
 		},
 	];
 
@@ -67,48 +72,54 @@ export function cli(args: Args) {
 				"Ciao, e benvenuto in Bookmark Manager! Il tool che ti permette di avere un resoconto su tutti i tuoi bookmark "
 			);
 
-			inquirer.prompt(q).then((answers: any) => {
-				console.log("\nEstrazione bookmarks...");
-				const { outputFormat } = answers;
-				const aReadPromises: Promise<ReadAsyncProp>[] = [];
-				profiles.map((p) => {
-					const path = join(rootChromeRootPath, p, "Bookmarks");
-					console.log("path", path);
-					aReadPromises.push(readAsync(path));
+			const job = () =>
+				inquirer.prompt(q).then((answers: any) => {
+					console.log("\nEstrazione bookmarks...");
+					const { outputFormat, profile, recursive } = answers;
+					const aReadPromises: Promise<ReadAsyncProp>[] = [];
+					// filtered profile from selected
+					const profileFiltered =
+						profile === "ALL"
+							? profiles
+							: profiles.filter((p) => p === profile);
+					console.log(profileFiltered.length);
+					profileFiltered.map((p) => {
+						const path = join(rootChromeRootPath, p, "Bookmarks");
+						aReadPromises.push(readAsync(path));
+					});
+
+					Promise.all(aReadPromises).then((values: ReadAsyncProp[]) => {
+						const aWritePromises: Promise<void>[] = [];
+						outputFormat.map((outType: ExportType) => {
+							debugger;
+							const file = createModelData(outType, values);
+							const isMd = outType.indexOf("md") !== -1;
+							const ext = isMd ? "md" : "json";
+							const filename = `bookmarks-${profile}-${outType}`;
+							aWritePromises.push(
+								writeAsync(
+									`${filename}.${ext}`,
+									isMd ? file : JSON.stringify(file, null, 2)
+								)
+							);
+						});
+						aWritePromises.length > 0 &&
+							Promise.all(aWritePromises)
+								.then((_) => {
+									console.log("all file are written");
+									recursive ? job() : process.exit(1);
+								})
+								.catch((err) => {
+									console.log(err);
+									process.exit(1);
+								});
+					});
+					//
+					// SE ALL allora scaricare i merged file
+					console.log(JSON.stringify(answers, null, "  "));
 				});
 
-				Promise.all(aReadPromises).then((values: ReadAsyncProp[]) => {
-					const aWritePromises: Promise<void>[] = [];
-					outputFormat.map((outType: ExportType) => {
-						debugger;
-						const file = createModelData(outType, values);
-						const isMd = outType.indexOf("md") !== -1;
-						const ext = isMd ? "md" : "json";
-						const filename = `output-${outType}`;
-						console.log(filename, ext);
-						aWritePromises.push(
-							writeAsync(
-								`${filename}.${ext}`,
-								isMd ? file : JSON.stringify(file, null, 2)
-							)
-						);
-					});
-					// console.log(aWritePromises.length);
-					aWritePromises.length > 0 &&
-						Promise.all(aWritePromises)
-							.then((_) => {
-								console.log("all file are written");
-								process.exit(1);
-							})
-							.catch((err) => {
-								console.log(err);
-								process.exit(1);
-							});
-				});
-				//
-				// SE ALL allora scaricare i merged file
-				console.log(JSON.stringify(answers, null, "  "));
-			});
+			job();
 		}
 	);
 }

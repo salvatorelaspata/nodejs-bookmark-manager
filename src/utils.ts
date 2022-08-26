@@ -58,7 +58,6 @@ export const writeAsync: (filePath: string, file: string) => Promise<void> = (
 	filePath,
 	file
 ) => {
-	console.log(filePath, file);
 	return new Promise((res, rej) => {
 		// override file if exists
 		writeFile(filePath, file, (err) => {
