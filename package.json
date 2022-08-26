@@ -7,7 +7,7 @@
   "scripts": {
     "build": "rollup -c rollup.config.js",
     "dev": "rollup -c rollup.config.js --watch",
-    "start": "rollup -c rollup.config.local.js && node distlocal/index.js",
+    "start": "npm run build:local && node distlocal/index.js",
     "build:local": "rollup -c rollup.config.local.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
